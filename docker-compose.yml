@@ -1,0 +1,47 @@
+services:
+
+  worker-ai-summary:
+    build: .
+    command: ["--queue", "ai_summary_queue"]
+    environment:
+      REDIS_HOST: linklian-redis
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
+    networks:
+      - linklian-net
+    restart: unless-stopped
+
+  worker-qdrant-vector-store:
+    build: .
+    command: ["--queue", "qdrant_vector_store"]
+    environment:
+      REDIS_HOST: linklian-redis
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      QDRANT_URL: ${QDRANT_URL}
+      QDRANT_API_KEY: ${QDRANT_API_KEY}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION}
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
+    networks:
+      - linklian-net
+    restart: unless-stopped
+
+  worker-quiz-generation:
+    build: .
+    command: ["--queue", "quiz_generation_queue"]
+    environment:
+      REDIS_HOST: linklian-redis
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
+    networks:
+      - linklian-net
+    restart: unless-stopped
+
+networks:
+  linklian-net:
+    external: true

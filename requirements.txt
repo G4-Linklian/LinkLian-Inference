@@ -1,0 +1,9 @@
+python-dotenv
+Pillow
+requests
+bullmq
+redis[asyncio]
+pdf2image
+poppler-utils
+azure-storage-blob
+qdrant-client

@@ -1,0 +1,85 @@
+import base64
+import time
+from typing import Any
+from app.services.llm.client import OpenRouterClient
+from app.services.llm.config import  LLMQuizGenerationConfig
+from app.services.llm.prompt_templates import LLMPromptTemplates
+from app.services.llm.response_format import LLMResponseFormatConfig
+from app.core.logger import AppLogger
+
+client = OpenRouterClient()
+logger = AppLogger()
+
+
+def _call_with_retry(payload: dict, *, label: str, max_attempts: int = 3) -> str:
+    last_error: Exception | None = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            result = client.chat_completion(payload)
+            content = result.get("choices", [{}])[0].get(
+                "message", {}).get("content")
+            if content:
+                return content
+            raise ValueError(f"{label} returned empty content")
+        except Exception as e:
+            last_error = e
+            logger.warn(
+                f"{label} failed, attempt {attempt}/{max_attempts}",
+                "LLMSummary",
+                {"error": str(e)},
+            )
+            if attempt < max_attempts:
+                time.sleep(1.5 * attempt)
+
+    raise last_error or RuntimeError(
+        f"{label} failed after {max_attempts} attempts")
+
+
+def quiz_generater(
+    summary_text,
+    difficulty,
+    num_questions,
+):
+    try:
+
+        user_prompt = f"""
+        Summary Text:
+        {summary_text}
+        
+        Create {num_questions} quiz questions.
+        
+        Difficulty: {difficulty}
+        
+        Return quiz based only on this summary.
+        """
+
+        payload = {
+            "model": LLMQuizGenerationConfig.DEFAULT_MODEL,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": LLMPromptTemplates.quiz_generation_prompt()
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+            ],
+            "max_tokens": LLMQuizGenerationConfig.DEFAULT_MAX_TOKENS,
+            "temperature": LLMQuizGenerationConfig.DEFAULT_TEMPERATURE,
+            "response_format": LLMResponseFormatConfig.QUIZ_GENERATION
+        }
+
+        return _call_with_retry(payload, label="generate_quiz")
+
+    except Exception as e:
+        logger.error(
+            "generate_quiz failed",
+            "LLMQuiz",
+            {
+                "difficulty": difficulty,
+                "num_questions": num_questions,
+                "error": str(e),
+            },
+        )
+        raise
