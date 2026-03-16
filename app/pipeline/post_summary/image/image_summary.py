@@ -22,7 +22,7 @@ def process_image_summary(post_content_id: str, file_index: int, file_info: dict
 	epr_parse = safe_json_parse(each_page_result) or {}
 
 	key_point = epr_parse.get("key_points", [])
-	page[f"page_{1}"] = key_point
+	page[f"{1}"] = key_point
 
 	logger.debug(
 		"Parsed summary result for image file",
@@ -53,4 +53,5 @@ def process_image_summary(post_content_id: str, file_index: int, file_info: dict
 		"success": True,
 		"file_text": file_text,
 		"page": page,
+		"page_count": 1,
 	}

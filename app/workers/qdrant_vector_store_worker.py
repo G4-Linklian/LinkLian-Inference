@@ -16,6 +16,7 @@ class QdrantVectorStoreWorker(BaseWorker):
         file_name = data.get("file_name")
         pages = data.get("page", {})
         file_count = data.get("file_count", 1)
+        page_count = data.get("page_count", 1)
         total_count = 0
         if isinstance(pages, dict):
             total_count = sum(
@@ -33,6 +34,7 @@ class QdrantVectorStoreWorker(BaseWorker):
                 "count": total_count,
                 "pages": list(pages.keys()) if isinstance(pages, dict) else None,
                 "file_count": file_count,
+                "page_count": page_count,
             },
         )
 
@@ -42,6 +44,7 @@ class QdrantVectorStoreWorker(BaseWorker):
             post_content_id,
             file_name,
             file_count,
+            page_count,
         )
 
         end_time = time.perf_counter()
@@ -50,7 +53,7 @@ class QdrantVectorStoreWorker(BaseWorker):
         self.logger.log(
             "Finished qdrant vector store job",
             self.__class__.__name__,
-            {"post_content_id": post_content_id, "elapsedMs": round(elapsed_ms, 4), "file_count": file_count},
+            {"post_content_id": post_content_id, "elapsedMs": round(elapsed_ms, 4), "file_count": file_count, "page_count": page_count},
         )
 
         return {

@@ -29,6 +29,7 @@ async def post_summary_pipeline(
                 "title": title,
                 "content": content,
                 "file": file,
+                "QDRANT_STORE": QDRANT_STORE,
             },
         )
 
@@ -56,6 +57,7 @@ async def post_summary_pipeline(
                     "file_name": file[i].get("original_name", f"file_{i}"),
                     "page": result.get("page", {}),
                     "file_count" : i+1,
+                    "page_count": result.get("page_count", 0),
                 }
                 
                 if QDRANT_STORE:
@@ -73,6 +75,7 @@ async def post_summary_pipeline(
                     "file_name": file[i].get("original_name", f"file_{i}"),
                     "page": result.get("page", {}),
                     "file_count" : i+1,
+                    "page_count": result.get("page_count", 0),
                 }
                 
                 if QDRANT_STORE:

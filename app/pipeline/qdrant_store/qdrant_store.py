@@ -15,6 +15,8 @@ def _build_points(
     post_id: str | int,
     page: str | int | None = None,
     file_name: str | None = None,
+    file_count: int | None = None,
+    page_count: int | None = None,
 ) -> list[PointStruct]:
     points: list[PointStruct] = []
     for kp in key_points:
@@ -23,12 +25,16 @@ def _build_points(
         vector = embed_text(kp)
         payload = {
             "text": kp,
-            "post_id": post_id,
+            "post_id": int(post_id),
         }
         if page is not None:
             payload["page"] = page
         if file_name:
             payload["file_name"] = file_name
+        if file_count is not None:
+            payload["file_count"] = file_count
+        if page_count is not None:
+            payload["page_count"] = page_count
 
         points.append(
             PointStruct(
@@ -46,6 +52,7 @@ def push_keypoints_sigle(
     post_id: str | int,
     page: int | None = None,
     file_name: str | None = None,
+    page_count: int | None = None,
 ) -> dict:
     try:
         if not key_points:
@@ -58,6 +65,7 @@ def push_keypoints_sigle(
             post_id,
             page=page,
             file_name=file_name,
+            page_count=page_count,
         )
 
         if not points:
@@ -89,6 +97,7 @@ def push_keypoints_multi(
     post_id: str | int,
     file_name: str | None = None,
     file_count: int | None = None,
+    page_count: int | None = None,
 ) -> dict:
     try:
         if not pages:
@@ -115,6 +124,7 @@ def push_keypoints_multi(
                 page=page_key,
                 file_name=file_name,
                 file_count=file_count,
+                page_count=page_count,
             )
             if page_points:
                 points.extend(page_points)
@@ -129,6 +139,7 @@ def push_keypoints_multi(
                         "key_points_count": len(key_points),
                         "points_built": len(page_points),
                         "file_count": file_count,
+                        "page_count": page_count,
                     },
                 )
 
@@ -148,6 +159,7 @@ def push_keypoints_multi(
                 "post_id": post_id,
                 "file_name": file_name,
                 "pages": pages_count,
+                "page_count": page_count,
             },
         )
 
@@ -156,6 +168,6 @@ def push_keypoints_multi(
         logger.error(
             "Upsert vectors to Qdrant (multi) failed",
             "QdrantStore",
-            {"post_id": post_id, "file_name": file_name, "error": str(e), "file_count": file_count},
+            {"post_id": post_id, "file_name": file_name, "error": str(e), "file_count": file_count, "page_count": page_count},
         )
         return {"success": False, "inserted": 0, "pages": 0, "error": str(e)}

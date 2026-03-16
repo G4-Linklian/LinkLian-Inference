@@ -17,7 +17,12 @@ class AppLogger:
         print("\n")
         if detail is not None:
             try:
-                formatted_detail = json.dumps(detail, indent=2, default=str)
+                formatted_detail = json.dumps(
+                    detail,
+                    indent=2,
+                    default=str,
+                    ensure_ascii=False,
+                )
             except Exception:
                 formatted_detail = str(detail)
 

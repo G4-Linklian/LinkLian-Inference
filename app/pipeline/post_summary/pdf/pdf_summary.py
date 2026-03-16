@@ -37,6 +37,22 @@ def process_pdf_summary(post_content_id: str, file_index: int, file_info: dict) 
             "num_pages": len(image_buffers),
         },
     )
+    
+    if len(image_buffers) > 100:
+        logger.log(
+            "Too many pages to process",
+            "PostSummaryPipeline",
+            {
+                "num_pages": len(image_buffers),
+            }
+        )
+        
+        return {
+            "success": False,
+            "message": "The PDF has too many pages to process. Please upload a PDF with less than 100 pages.",
+            "num_pages": len(image_buffers),
+        }
+    
 
     final_result = []
     page: dict = {}
@@ -47,7 +63,7 @@ def process_pdf_summary(post_content_id: str, file_index: int, file_info: dict) 
         epr_parse = safe_json_parse(each_page_result) or {}
 
         key_point = epr_parse.get("key_points", [])
-        page[f"page_{index+1}"] = key_point
+        page[f"{index+1}"] = key_point
 
         epr_blob_path = (
             f"summary-post-announcement/each-{post_content_id}-{file_index + 1}-{index + 1}.json"

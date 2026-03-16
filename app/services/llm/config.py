@@ -21,3 +21,13 @@ class LLMQuizGenerationConfig:
     DEFAULT_MODEL = "google/gemini-2.5-flash-lite"
     DEFAULT_MAX_TOKENS = 2000
     DEFAULT_TEMPERATURE = 0.3
+    
+class LLMRewriteConfig:
+    DEFAULT_MODEL = "google/gemini-2.5-flash-lite"
+    DEFAULT_MAX_TOKENS = 300
+    DEFAULT_TEMPERATURE = 0.1
+    
+class LLMQAConfig:
+    DEFAULT_MODEL = "google/gemini-2.5-flash-lite"
+    DEFAULT_MAX_TOKENS = 1000
+    DEFAULT_TEMPERATURE = 0.8
