@@ -1,7 +1,6 @@
 services:
 
   worker-ai-summary:
-    build: .
     image: linklian-inference:latest
     command: ["--queue", "ai_summary_queue"]
     environment:
@@ -13,10 +12,11 @@ services:
       AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
     networks:
       - linklian-net
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: any
 
   worker-qdrant-vector-store:
-    build: .
     image: linklian-inference:latest
     command: ["--queue", "qdrant_vector_store"]
     environment:
@@ -31,10 +31,11 @@ services:
       AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
     networks:
       - linklian-net
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: any
 
   worker-quiz-generation:
-    build: .
     image: linklian-inference:latest
     command: ["--queue", "quiz_generation_queue"]
     environment:
@@ -46,10 +47,11 @@ services:
       AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
     networks:
       - linklian-net
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: any
 
   worker-qa-chat:
-    build: .
     image: linklian-inference:latest
     command: ["--queue", "qa_chat_queue"]
     environment:
@@ -64,8 +66,11 @@ services:
       AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
     networks:
       - linklian-net
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: any
 
 networks:
   linklian-net:
-    external: true
+    driver: overlay
+    attachable: true
