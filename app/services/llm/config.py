@@ -3,6 +3,8 @@ import os
 class LLMConfig:
     BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
     API_KEY = os.getenv("OPENROUTER_API_KEY")
+    SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://localhost")
+    APP_TITLE = os.getenv("OPENROUTER_APP_TITLE", "LinkLian")
     DEFAULT_MODEL = "google/gemini-2.5-flash-lite"
     DEFAULT_MAX_TOKENS = 200
     DEFAULT_TEMPERATURE = 0.0
