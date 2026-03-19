@@ -2,6 +2,7 @@ services:
 
   worker-ai-summary:
     build: .
+    image: linklian-inference:latest
     command: ["--queue", "ai_summary_queue"]
     environment:
       REDIS_HOST: linklian-redis
@@ -16,6 +17,7 @@ services:
 
   worker-qdrant-vector-store:
     build: .
+    image: linklian-inference:latest
     command: ["--queue", "qdrant_vector_store"]
     environment:
       REDIS_HOST: linklian-redis
@@ -33,6 +35,7 @@ services:
 
   worker-quiz-generation:
     build: .
+    image: linklian-inference:latest
     command: ["--queue", "quiz_generation_queue"]
     environment:
       REDIS_HOST: linklian-redis
@@ -47,6 +50,7 @@ services:
 
   worker-qa-chat:
     build: .
+    image: linklian-inference:latest
     command: ["--queue", "qa_chat_queue"]
     environment:
       REDIS_HOST: linklian-redis
