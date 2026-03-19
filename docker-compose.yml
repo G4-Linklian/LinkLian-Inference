@@ -72,5 +72,5 @@ services:
 
 networks:
   linklian-net:
-    driver: overlay
-    attachable: true
+    external: true
+    name: linklian-net
