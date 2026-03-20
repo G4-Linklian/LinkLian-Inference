@@ -9,6 +9,40 @@ from collections import Counter
 import math
 
 logger = AppLogger()
+_POST_ID_INDEX_READY = False
+
+
+def _ensure_post_id_index(client) -> None:
+    global _POST_ID_INDEX_READY
+
+    if _POST_ID_INDEX_READY:
+        return
+
+    try:
+        # Qdrant Cloud can require a payload index before filtering by integer fields.
+        client.create_payload_index(
+            collection_name=QdrantConfig.COLLECTION_NAME,
+            field_name="post_id",
+            field_schema="integer",
+        )
+        logger.log(
+            "Created payload index for post_id",
+            "QdrantRetrieve",
+            {"collection": QdrantConfig.COLLECTION_NAME},
+        )
+        _POST_ID_INDEX_READY = True
+    except Exception as e:
+        message = str(e).lower()
+        if "already exists" in message:
+            _POST_ID_INDEX_READY = True
+            return
+
+        logger.warn(
+            "Failed to create payload index for post_id",
+            "QdrantRetrieve",
+            {"error": str(e)},
+        )
+        raise
 
 
 def retrieve_docs(
@@ -30,19 +64,34 @@ def retrieve_docs(
 
     client = get_qdrant_client()
 
-    result = client.query_points(
-        collection_name=QdrantConfig.COLLECTION_NAME,
-        query=query_vector,
-        limit=limit,
-        query_filter=Filter(
-            must=[
-                FieldCondition(
-                    key="post_id",
-                    match=MatchValue(value=int(post_id)),
-                )
-            ]
-        ),
+    query_filter = Filter(
+        must=[
+            FieldCondition(
+                key="post_id",
+                match=MatchValue(value=int(post_id)),
+            )
+        ]
     )
+
+    try:
+        result = client.query_points(
+            collection_name=QdrantConfig.COLLECTION_NAME,
+            query=query_vector,
+            limit=limit,
+            query_filter=query_filter,
+        )
+    except Exception as e:
+        error_text = str(e)
+        if "Index required but not found" in error_text and '"post_id"' in error_text:
+            _ensure_post_id_index(client)
+            result = client.query_points(
+                collection_name=QdrantConfig.COLLECTION_NAME,
+                query=query_vector,
+                limit=limit,
+                query_filter=query_filter,
+            )
+        else:
+            raise
     
     logger.debug(
         "Qdrant query successful",
