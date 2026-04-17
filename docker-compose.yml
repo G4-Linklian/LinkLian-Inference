@@ -1,7 +1,7 @@
 services:
 
   worker-ai-summary:
-    image: ${LINKLIAN_WORKER_IMAGE:-linklianops.azurecr.io/linklian-inference:latest}
+    build: .
     command: ["--queue", "ai_summary_queue"]
     environment:
       REDIS_HOST: linklian-redis
@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
 
   worker-qdrant-vector-store:
-    image: ${LINKLIAN_WORKER_IMAGE:-linklianops.azurecr.io/linklian-inference:latest}
+    build: .
     command: ["--queue", "qdrant_vector_store"]
     environment:
       REDIS_HOST: linklian-redis
@@ -40,7 +40,7 @@ services:
     restart: unless-stopped
 
   worker-quiz-generation:
-    image: ${LINKLIAN_WORKER_IMAGE:-linklianops.azurecr.io/linklian-inference:latest}
+    build: .
     command: ["--queue", "quiz_generation_queue"]
     environment:
       REDIS_HOST: linklian-redis
@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
 
   worker-qa-chat:
-    image: ${LINKLIAN_WORKER_IMAGE:-linklianops.azurecr.io/linklian-inference:latest}
+    build: .
     command: ["--queue", "qa_chat_queue"]
     environment:
       REDIS_HOST: linklian-redis
