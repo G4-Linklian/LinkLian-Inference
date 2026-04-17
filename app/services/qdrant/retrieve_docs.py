@@ -12,6 +12,21 @@ logger = AppLogger()
 _POST_ID_INDEX_READY = False
 
 
+def _is_missing_post_id_index_error(error_text: str) -> bool:
+    return "Index required but not found" in error_text and '"post_id"' in error_text
+
+
+def _is_not_found_error(error_text: str) -> bool:
+    normalized = error_text.lower()
+    return "404" in normalized and "not found" in normalized
+
+
+def _extract_points(result) -> list:
+    if isinstance(result, list):
+        return result
+    return getattr(result, "points", []) or []
+
+
 def _ensure_post_id_index(client) -> None:
     global _POST_ID_INDEX_READY
 
@@ -73,23 +88,45 @@ def retrieve_docs(
         ]
     )
 
-    try:
-        result = client.query_points(
+    def _run_query_points():
+        return client.query_points(
             collection_name=QdrantConfig.COLLECTION_NAME,
             query=query_vector,
             limit=limit,
             query_filter=query_filter,
         )
+
+    def _run_search():
+        # Fallback for servers that do not expose query_points endpoint.
+        return client.search(
+            collection_name=QdrantConfig.COLLECTION_NAME,
+            query_vector=query_vector,
+            limit=limit,
+            query_filter=query_filter,
+        )
+
+    try:
+        result = _run_query_points()
     except Exception as e:
         error_text = str(e)
-        if "Index required but not found" in error_text and '"post_id"' in error_text:
+        if _is_missing_post_id_index_error(error_text):
             _ensure_post_id_index(client)
-            result = client.query_points(
-                collection_name=QdrantConfig.COLLECTION_NAME,
-                query=query_vector,
-                limit=limit,
-                query_filter=query_filter,
+            result = _run_query_points()
+        elif _is_not_found_error(error_text):
+            logger.warn(
+                "query_points endpoint returned 404, fallback to search",
+                "QdrantRetrieve",
+                {"collection": QdrantConfig.COLLECTION_NAME},
             )
+            try:
+                result = _run_search()
+            except Exception as fallback_error:
+                fallback_text = str(fallback_error)
+                if _is_missing_post_id_index_error(fallback_text):
+                    _ensure_post_id_index(client)
+                    result = _run_search()
+                else:
+                    raise
         else:
             raise
     
@@ -97,7 +134,7 @@ def retrieve_docs(
         "Qdrant query successful",
         "QdrantRetrieve",
         {
-            "length": len(result.points),
+            "length": len(_extract_points(result)),
         }
     )
 
@@ -105,10 +142,11 @@ def retrieve_docs(
 
 
 def get_top_pages(result):
+    points = _extract_points(result)
     page_pairs = []
     page_count = None
     
-    if (not result.points) or (not result.points[0].payload):
+    if (not points) or (not points[0].payload):
         return {
             "most_common_file": None,
             "most_common_page": None,
@@ -117,7 +155,7 @@ def get_top_pages(result):
             "top_k_pages": []
         }
 
-    for point in result.points:
+    for point in points:
         payload = point.payload
         score = point.score
         
