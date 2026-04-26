@@ -85,28 +85,22 @@ class LLMResponseFormatConfig:
                             "type": "string"
                         }
                     },
-                    "key_insights": {
-                        "type": "array",
-                        "description": "Important insights or findings extracted from across all pages",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "visual_elements_summary": {
-                        "type": "string",
-                        "description": "Summary of important visual elements such as charts, tables, diagrams, or figures found across the document"
-                    },
+                    # "key_insights": {
+                    #     "type": "array",
+                    #     "description": "Important insights or findings extracted from across all pages",
+                    #     "items": {
+                    #         "type": "string"
+                    #     }
+                    # },
                     "final_summary": {
                         "type": "string",
-                        "description": "Comprehensive summary of the entire document combining all page information"
+                        "description": "A detailed summary of the entire document, consolidating information from all pages and summarizing each point into bullet points according to the main topic, using Markdown and formatting for a neat appearance."
                     }
                 },
                 "required": [
                     "document_title",
                     "document_overview",
                     "main_topics",
-                    "key_insights",
-                    "visual_elements_summary",
                     "final_summary"
                 ],
                 "additionalProperties": False
