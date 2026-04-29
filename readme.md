@@ -4,6 +4,7 @@ Worker-based inference service for:
 - document/image summarization
 - vector embedding storage in Qdrant
 - quiz generation from summaries
+- q&a chat response queue
 
 ## Requirements
 - Python 3.11+
@@ -61,6 +62,7 @@ Use the worker runner:
 python worker.py --queue ai_summary_queue
 python worker.py --queue qdrant_vector_store
 python worker.py --queue quiz_generation_queue
+python worker.py --queue qa_chat_queue
 ```
 
 ## Run with Docker Compose
@@ -96,6 +98,18 @@ Input:
 	"difficulty": "medium",
 	"num_questions": 5,
 	"file_name": "CSS336Lecture05CultureatGoogle.pdf"
+}
+```
+
+### qa_chat_queue
+Current behavior (temporary):
+- Returns fixed message: `"มีอะไรให้ช่วยไหม"`
+
+Input:
+```json
+{
+	"session_id": "session-001",
+	"question": "สรุปโพสต์นี้ให้หน่อย"
 }
 ```
 

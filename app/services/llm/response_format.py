@@ -85,28 +85,22 @@ class LLMResponseFormatConfig:
                             "type": "string"
                         }
                     },
-                    "key_insights": {
-                        "type": "array",
-                        "description": "Important insights or findings extracted from across all pages",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "visual_elements_summary": {
-                        "type": "string",
-                        "description": "Summary of important visual elements such as charts, tables, diagrams, or figures found across the document"
-                    },
+                    # "key_insights": {
+                    #     "type": "array",
+                    #     "description": "Important insights or findings extracted from across all pages",
+                    #     "items": {
+                    #         "type": "string"
+                    #     }
+                    # },
                     "final_summary": {
                         "type": "string",
-                        "description": "Comprehensive summary of the entire document combining all page information"
+                        "description": "A detailed summary of the entire document, consolidating information from all pages and summarizing each point into bullet points according to the main topic, using Markdown and formatting for a neat appearance."
                     }
                 },
                 "required": [
                     "document_title",
                     "document_overview",
                     "main_topics",
-                    "key_insights",
-                    "visual_elements_summary",
                     "final_summary"
                 ],
                 "additionalProperties": False
@@ -155,6 +149,65 @@ class LLMResponseFormatConfig:
                     "total_questions",
                     "questions"
                 ]
+            }
+        }
+    }
+
+    REWRITE_RESPONSE_FORMAT = {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "rewriting_result",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "rewritten_text": {
+                        "type": "string",
+                        "description": "User text rewritten into clear English"
+                    },
+                    "detected_language": {
+                        "type": "string",
+                        "description": "Detected language of the input"
+                    },
+                    "should_search": {
+                        "type": "boolean",
+                        "description": "Whether the user query itself should trigger document search"
+                    },
+                    "suggested_search_query": {
+                        "type": ["string", "null"],
+                        "description": "Alternative search query inferred from chat history if the user query itself should not be searched"
+                    }
+                },
+                "required": [
+                    "rewritten_text",
+                    "detected_language",
+                    "should_search",
+                    "suggested_search_query"
+                ]
+            }
+        }
+    }
+
+    QA_RESPONSE_FORMAT = {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "qa_result",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "answer": {
+                        "type": "string",
+                        "description": "Final answer in Thai"
+                    },
+                    "confidence": {
+                        "type": "number",
+                        "description": "Confidence score between 0 and 1"
+                    },
+                    "source_used": {
+                        "type": "boolean",
+                        "description": "Whether the document context contained the answer"
+                    }
+                },
+                "required": ["answer", "confidence", "source_used"]
             }
         }
     }
